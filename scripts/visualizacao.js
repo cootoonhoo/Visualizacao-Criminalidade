@@ -1,21 +1,16 @@
-let _dadosCriminalidade = null;
+function primeiraVisualizacao() {
+    const dadosHomicio = FilterService.filtrarPorCrime(2);
+    const dadosAgrupados = FilterService.agruparPorUfMunicipio(dadosHomicio);
+    const valores = dadosAgrupados.map(d => d.soma_vitimas);
 
-(async () => {
-    try {
-        _dadosCriminalidade = await d3.csv("../source/dadosCrimesAnual/dadosTratados/dados_crimes_2025.csv");
-        console.log("Dados carregados com sucesso:", _dadosCriminalidade.length, "registros.");
+    const [min, max] = d3.extent(dadosAgrupados, d => d.soma_vitimas);
 
-    } catch (erro) {
-        console.error("Erro ao carregar o arquivo CSV:", erro);
-    }
-})();
+    const escalaCor = d3.scaleQuantile()
+        .domain(valores)
+        .range(d3.schemeReds[7]);
 
-function getDadosCriminalidade() {
-    if (_dadosCriminalidade !== null)
-        return _dadosCriminalidade;
-
-    throw new Error("Os dados de criminalidade ainda não foram carregados.");
+    dadosAgrupados.forEach(d => {
+        const cor = escalaCor(d.soma_vitimas);
+        colorirMunicipio(d.municipio, d.uf,  cor);
+    });
 }
-
-// Deixa acessível globalmente
-window.getDadosCriminalidade = getDadosCriminalidade;

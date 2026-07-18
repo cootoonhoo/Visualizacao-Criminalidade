@@ -9,18 +9,18 @@
 <body>
     <div id="display"></div>
 </body>
-    <script src="./scripts/main.js"></script>
-    <script src="./scripts/visualizacao.js"></script>
-    <script>
-        (async () => {
-            await renderizaMapaBrasil('display');
-            colorirEstado('AC', '#a6df01');
-            colorirEstado('RR', '#ff5733');
-            colorirEstado('SP', '#3357ff');
-            colorirMunicipio('RIO DE JANEIRO', 'RJ', '#ff0000');
-            colorirMunicipio('UBERLÂNDIA', 'MG', '#ff0000');
-            
-            
-        })();
+    <!-- A ORDER DESSES SCRIPTS IMPORTA! -->
+    <script src="./scripts/domain.js">
+        // Módulo com funções e entidades importantes
+    </script>
+    <script src="./scripts/filterService.js">
+        // Módulo com funções de filtragem
+    </script>
+    <script src="./scripts/main.js">
+        // Módulo com as funções de renderização do mapa do Brasil e de colorir estados e municípios.
+    </script> 
+    <script src="./scripts/visualizacao.js">
+        // Módulo com funções de visualização (gráficos, tabelas, etc.)
+        // Atenção, esse módulo deve ser carregado por último, pois depende dos outros módulos.
     </script>
 </html>

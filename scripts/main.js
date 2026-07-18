@@ -1,5 +1,6 @@
 const municipiosColoridos = new Set();
 const estadosColoridos = new Set();
+const dicionarioSvg = new Map();
 
 async function renderizaMapaBrasil(idContainerMapaBrasil) {
     try {
@@ -8,12 +9,20 @@ async function renderizaMapaBrasil(idContainerMapaBrasil) {
             throw new Error(`Erro HTTP: ${response.status}`);
         }
         const svg = await response.text();
-        document.getElementById(idContainerMapaBrasil).innerHTML = svg;
+        const container = document.getElementById(idContainerMapaBrasil);
+        container.innerHTML = svg;
+
+        const paths = container.querySelectorAll('path[id]');
+        paths.forEach(path => {
+            const idOriginal = path.id;
+            const chaveLimpa = simplificarTexto(idOriginal);
+            dicionarioSvg.set(chaveLimpa, idOriginal);
+        });
+
     } catch (error) {
         console.error('Erro ao carregar o SVG:', error);
     }
 }
-
 
 function colorirEstado(siglaEstado, corHexadecimal) {
     const sigla = siglaEstado.toUpperCase();
@@ -61,26 +70,29 @@ function flushEstados() {
 }
 
 function colorirMunicipio(cidade, estado, corHexadecimal) {
-    const idSvg = formatarIdMunicipio(cidade, estado);
-    const elemento = document.getElementById(idSvg);
+    const idSvg = obterIdRealDoSvg(cidade, estado);
+    
+    if (!idSvg) {
+        console.error(`Município não encontrado no dicionário após limpar texto: ${cidade} - ${estado}`);
+        return;
+    }
 
+    const elemento = document.getElementById(idSvg);
     if (elemento) {
         elemento.style.fill = corHexadecimal;
         municipiosColoridos.add(idSvg);
-    } else {
-        console.error(`ID não encontrado no SVG: ${idSvg}`);
     }
 }
 
 function limparMunicipios(cidade, estado) {
-    const idSvg = formatarIdMunicipio(cidade, estado);
-    const elemento = document.getElementById(idSvg);
+    const idSvg = obterIdRealDoSvg(cidade, estado);
+    
+    if (!idSvg) return;
 
+    const elemento = document.getElementById(idSvg);
     if (elemento) {
         elemento.style.fill = '#a8a8a8';
         municipiosColoridos.delete(idSvg);
-    } else {
-        console.error(`ID não encontrado no SVG: ${idSvg}`);
     }
 }
 
@@ -94,17 +106,21 @@ function flushMunicipios() {
     municipiosColoridos.clear();
 }
 
-function formatarIdMunicipio(cidade, estado) {
-    const preposicoes = ["de", "da", "do", "das", "dos"];
-    const cidadeFormatada = cidade
-        .trim()
-        .toLowerCase()
-        .split(' ')
-        .map(palavra => {
-            if (preposicoes.includes(palavra)) return palavra;
-            return palavra.charAt(0).toUpperCase() + palavra.slice(1);
-        })
-        .join('_');
-
-    return `${cidadeFormatada}_${estado.trim()}`;
+function simplificarTexto(texto) {
+    return texto
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-zA-Z0-9]/g, "")
+        .toLowerCase();
 }
+
+function obterIdRealDoSvg(cidade, estado) {
+    const chaveBusca = simplificarTexto(cidade + estado);
+    return dicionarioSvg.get(chaveBusca);
+}
+
+// Auto execuçãco
+// Apenas para carregar o mapa do brasil
+(async () => {
+    await renderizaMapaBrasil('display');
+})();
