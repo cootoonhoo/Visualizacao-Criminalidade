@@ -1,19 +1,31 @@
-function colorirMapaPorCrime(idCrime) {
+// 1. Atualize a assinatura da função para receber o nível do dado
+function colorirMapaPorCrime(idCrime, nivel = 'estadual') {
     if (!NomesCrimes[idCrime]) {
         console.error("colorirMapaPorCrime - ID de crime não encontrado:", idCrime);
         return;
     }
 
+    flushEstados();
+    if (typeof flushMunicipios === 'function') flushMunicipios();
+
     const dadosCrime = FilterService.filtrarPorCrime(idCrime);
-    const dadosAgrupados = FilterService.agruparPorUfMunicipio(dadosCrime);
+    
+    let dadosAgrupados = [];
 
-    const munComCrimes = dadosAgrupados.filter(d => d.soma_vitimas > 0);
-    const munSemCrimes = dadosAgrupados.filter(d => d.soma_vitimas === 0);
+    if (nivel === 'estadual') {
+            dadosAgrupados = FilterService.agruparPorUf(dadosCrime);
+    }
+    else {
+        dadosAgrupados = FilterService.agruparPorUfMunicipio(dadosCrime);
+    }
 
-    const valores = munComCrimes.map(d => d.soma_vitimas);
+    const registrosComCrimes = dadosAgrupados.filter(d => d.soma_vitimas > 0);
+    const registrosSemCrimes = dadosAgrupados.filter(d => d.soma_vitimas === 0);
+
+    const valores = registrosComCrimes.map(d => d.soma_vitimas);
 
     if (valores.length === 0) {
-        console.warn(`Nenhum crime registrado para: ${NomesCrimes[idCrime]}`);
+        console.warn(`Nenhum crime registrado para: ${NomesCrimes[idCrime]} no nível ${nivel}`);
     }
 
     const escalaCor = d3.scaleQuantile()
@@ -22,14 +34,26 @@ function colorirMapaPorCrime(idCrime) {
 
     const corZero = "#fee5d9";
 
-    munSemCrimes.forEach(d => {
-        colorirMunicipio(d.municipio, d.uf, corZero);
-    });
+    if (nivel === 'estadual') {
+        registrosSemCrimes.forEach(d => {
+            colorirEstado(d.uf, corZero);
+        });
 
-    munComCrimes.forEach(d => {
-        const cor = escalaCor(d.soma_vitimas);
-        colorirMunicipio(d.municipio, d.uf, cor);
-    });
+        registrosComCrimes.forEach(d => {
+            const cor = escalaCor(d.soma_vitimas);
+            colorirEstado(d.uf, cor);
+        });
+    } else {
+        // Municipal
+        registrosSemCrimes.forEach(d => {
+            colorirMunicipio(d.municipio, d.uf, corZero);
+        });
+
+        registrosComCrimes.forEach(d => {
+            const cor = escalaCor(d.soma_vitimas);
+            colorirMunicipio(d.municipio, d.uf, cor);
+        });
+    }
 
     criarLegenda(escalaCor, corZero); 
     criarGraficoBarras(idCrime);
@@ -160,7 +184,6 @@ function criarGraficoBarras(idCrime) {
         .style("fill", "#333") 
         .text("Somatório de vítimas ao longo do ano");
 
-    // Eixo X
     svg.append("g")
         .attr("transform", `translate(0,${altura})`)
         .call(d3.axisBottom(x).tickSizeOuter(0))
@@ -214,7 +237,7 @@ function criarGraficoBarras(idCrime) {
                 Total vítimas: ${Math.round(d.soma_vitimas)}`
             )
                 .style("opacity", 1);
-                   
+                    
             d3.select(this).attr("fill", "#a50f15"); 
         })
         .on("mousemove", function(event) {
@@ -227,8 +250,7 @@ function criarGraficoBarras(idCrime) {
         });
 }
 
-function mapaViewPadrao()
-{
+function mapaViewPadrao() {
     const corPadrao = '#5ead4f';
     flushEstados();
     flushMunicipios();
@@ -261,6 +283,6 @@ function mapaViewPadrao()
     colorirEstado('SP',corPadrao);
     colorirEstado('SE',corPadrao);
     colorirEstado('TO',corPadrao);
-    document.getElementById('legenda').innerText= ''; // Removendo legenda
-    document.getElementById('grafico-barras').innerText= ''; // Removendo gráfico em barras
+    document.getElementById('legenda').innerText= ''; 
+    document.getElementById('grafico-barras').innerText= ''; 
 }

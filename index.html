@@ -3,14 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mapa de Criminalidade</title>
+    <title>Mapa de Segurança Pública - Brasil</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         #controles {
             margin: 20px;
             font-family: sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 15px; 
         }
-        #select-crime {
+        
+        #select-crime, #select-nivel {
             padding: 8px;
             font-size: 16px;
         }
@@ -31,20 +35,32 @@
 </head>
 <body>
     <div id="controles">
-        <label for="select-crime">Escolha um evento: </label>
-        <select id="select-crime">
-            <option value="0">Selecione um evento</option>
-            <option value="1">Feminicídio</option>
-            <option value="2">Homicídio doloso </option>
-            <option value="3">Lesão corporal seguida de morte </option>
-            <option value="4">Morte no trânsito ou em decorrência dele (exceto homicídio doloso) </option>
-            <option value="5">Mortes no trânsito </option>
-            <option value="6">Roubo seguido de morte (latrocínio) </option>
-            <option value="7">Suicídio </option>
-            <option value="8">Tentativa de feminicídio </option>
-            <option value="9">Tentativa de homicídio </option>
-        </select>
+        <!-- Filtro de Crime -->
+        <div>
+            <label for="select-crime">Escolha um evento: </label>
+            <select id="select-crime">
+                <option value="0">Selecione um evento</option>
+                <option value="1">Feminicídio</option>
+                <option value="2">Homicídio doloso</option>
+                <option value="3">Lesão corporal seguida de morte</option>
+                <option value="4">Morte no trânsito ou em decorrência dele (exceto homicídio doloso)</option>
+                <option value="5">Mortes no trânsito</option>
+                <option value="6">Roubo seguido de morte (latrocínio)</option>
+                <option value="7">Suicídio</option>
+                <option value="8">Tentativa de feminicídio</option>
+                <option value="9">Tentativa de homicídio</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="select-nivel">Nível dos dados: </label>
+            <select id="select-nivel">
+                <option value="estadual">Estadual</option>
+                <option value="municipal">Municipal</option>
+            </select>
+        </div>
     </div>
+    
     <div id="grafico-container">
         <div id="mapa-brasil">
             <div id="display"></div>
@@ -59,8 +75,5 @@
     <script src="./scripts/main.js"></script>
     <script src="./scripts/visualizacao.js"></script>
     <script src="./scripts/eventManager.js"></script>
-    <script>
-        
-    </script>
 </body>
 </html>

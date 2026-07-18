@@ -1,23 +1,25 @@
-
 const selectCrime = document.getElementById('select-crime');
+const selectNivel = document.getElementById('select-nivel');
 
-selectCrime.addEventListener('change', (evento) => {
+function aplicarFiltros() {
     flushEstados();
-    const valorSelecionado = evento.target.value;
     
-    if (valorSelecionado !== "") {
-        const idDoCrime = parseInt(valorSelecionado, 10);
-        if(idDoCrime == 0)
-        {
-            mapaViewPadrao();
-            return;
-        }
-
-        colorirMapaPorCrime(idDoCrime);
+    const filtros = getFilters();
+    
+    if (filtros.idCrime === 0) {
+        mapaViewPadrao();
+        return;
     }
-});
 
-function getFilters()
-{
-    
+    colorirMapaPorCrime(filtros.idCrime, filtros.nivel);
+}
+
+selectCrime.addEventListener('change', aplicarFiltros);
+selectNivel.addEventListener('change', aplicarFiltros);
+
+function getFilters() {
+    return {
+        idCrime: parseInt(selectCrime.value, 10) || 0,
+        nivel: selectNivel.value
+    };
 }

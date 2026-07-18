@@ -41,6 +41,27 @@ const FilterService = {
         return Object.values(grupos);
     },
 
+    // NOVO MÉTODO: Agrupamento em nível estadual
+    agruparPorUf: function(registros) {
+        const grupos = registros.reduce((acc, registro) => {
+            const chave = registro.uf;
+
+            if (!acc[chave]) {
+                acc[chave] = {
+                    uf: registro.uf,
+                    crime_nome: registro.crime_nome,
+                    soma_vitimas: 0
+                };
+            }
+
+            acc[chave].soma_vitimas += parseFloat(registro.vitimas_escala) || 0;
+
+            return acc;
+        }, {});
+
+        return Object.values(grupos);
+    },
+
     agruparPorMes: function(registros) {
         const grupos = registros.reduce((acc, registro) => {
             const chave = `${registro.ano}|${registro.mes}`;
@@ -60,5 +81,5 @@ const FilterService = {
         }, {});
 
         return Object.values(grupos);
-    },
+    }
 }
