@@ -123,4 +123,5 @@ function obterIdRealDoSvg(cidade, estado) {
 // Apenas para carregar o mapa do brasil
 (async () => {
     await renderizaMapaBrasil('display');
+    document.getElementById('map-style').innerHTML = ''; //Removendo style global do background do svg
 })();
