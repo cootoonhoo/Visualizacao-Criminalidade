@@ -8,8 +8,9 @@
 </head>
 <body>
     <div id="display"></div>
-
+</body>
     <script src="./scripts/main.js"></script>
+    <script src="./scripts/visualizacao.js"></script>
     <script>
         (async () => {
             await renderizaMapaBrasil('display');
@@ -18,7 +19,8 @@
             colorirEstado('SP', '#3357ff');
             colorirMunicipio('RIO DE JANEIRO', 'RJ', '#ff0000');
             colorirMunicipio('UBERLÂNDIA', 'MG', '#ff0000');
+            
+            
         })();
     </script>
-</body>
 </html>
