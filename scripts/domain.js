@@ -37,3 +37,5 @@ const NomesCrimes = Object.freeze(
         Object.entries(MapeamentoCrimes).map(([chave, valor]) => [valor, chave])
     )
 );
+
+const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];

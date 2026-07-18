@@ -39,5 +39,26 @@ const FilterService = {
         }, {});
 
         return Object.values(grupos);
-    }
+    },
+
+    agruparPorMes: function(registros) {
+        const grupos = registros.reduce((acc, registro) => {
+            const chave = `${registro.ano}|${registro.mes}`;
+
+            if (!acc[chave]) {
+                acc[chave] = {
+                    ano: registro.ano,
+                    mes: registro.mes,
+                    crime_nome: registro.crime_nome,
+                    soma_vitimas: 0
+                };
+            }
+
+            acc[chave].soma_vitimas += parseFloat(registro.vitimas_escala) || 0;
+
+            return acc;
+        }, {});
+
+        return Object.values(grupos);
+    },
 }

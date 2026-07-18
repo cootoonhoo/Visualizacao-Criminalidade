@@ -14,6 +14,19 @@
             padding: 8px;
             font-size: 16px;
         }
+
+        #mapa-brasil {
+            position: relative;
+        }
+
+        #legenda {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            z-index: 999;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+        }
     </style>
 </head>
 <body>
@@ -32,10 +45,14 @@
             <option value="9">Tentativa de homicídio </option>
         </select>
     </div>
-
-    <div id="display"></div>
-    <div id="legenda"></div>
-
+    <div id="grafico-container">
+        <div id="mapa-brasil">
+            <div id="display"></div>
+            <div id="legenda"></div>
+        </div>
+        <div id="grafico-barras" style="margin: 20px; max-width: 850px;"></div>
+    </div>
+    
     <!-- A ORDEM DESSES SCRIPTS IMPORTA! -->
     <script src="./scripts/domain.js"></script>
     <script src="./scripts/filterService.js"></script>
