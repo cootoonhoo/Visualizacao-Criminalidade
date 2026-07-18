@@ -1,4 +1,6 @@
 let _dadosCriminalidade = null;
+let _dadosCriminalidadeEstado = null;
+
 
 (async () => {
     try {
@@ -6,6 +8,8 @@ let _dadosCriminalidade = null;
         console.log("Dados carregados com sucesso:", _dadosCriminalidade.length, "registros.");
         // console.log("Prévia:", JSON.stringify(_dadosCriminalidade.slice(0, 5), null, 1));
 
+        _dadosCriminalidadeEstado = await d3.csv("../source/dadosCrimesAnual/dadosTratados/dados_crimes_estados_2025.csv");
+        console.log("Dados carregados com sucesso:", _dadosCriminalidadeEstado.length, "registros.");
     } catch (erro) {
         console.error("Erro ao carregar o arquivo CSV:", erro);
     }
@@ -18,7 +22,15 @@ function getDadosCriminalidade() {
     throw new Error("Os dados de criminalidade ainda não foram carregados.");
 }
 
+function getDadosCriminalidadeEstado() {
+    if (_dadosCriminalidadeEstado !== null)
+        return _dadosCriminalidadeEstado;
+
+    throw new Error("Os dados de criminalidade estadual ainda não foram carregados.");
+}
+
 window.getDadosCriminalidade = getDadosCriminalidade;
+window.getDadosCriminalidadeEstado = getDadosCriminalidadeEstado;
 
 const MapeamentoCrimes = Object.freeze({
     'Feminicídio': 1,

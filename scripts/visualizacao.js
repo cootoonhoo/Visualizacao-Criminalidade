@@ -1,4 +1,3 @@
-// 1. Atualize a assinatura da função para receber o nível do dado
 function colorirMapaPorCrime(idCrime, nivel = 'estadual') {
     if (!NomesCrimes[idCrime]) {
         console.error("colorirMapaPorCrime - ID de crime não encontrado:", idCrime);
@@ -8,25 +7,18 @@ function colorirMapaPorCrime(idCrime, nivel = 'estadual') {
     flushEstados();
     if (typeof flushMunicipios === 'function') flushMunicipios();
 
-    const dadosCrime = FilterService.filtrarPorCrime(idCrime);
-    
+    const dadosCrime = FilterService.filtrarPorCrime(idCrime, nivel);
     let dadosAgrupados = [];
 
     if (nivel === 'estadual') {
-            dadosAgrupados = FilterService.agruparPorUf(dadosCrime);
-    }
-    else {
+        dadosAgrupados = FilterService.agruparPorUf(dadosCrime);
+    } else {
         dadosAgrupados = FilterService.agruparPorUfMunicipio(dadosCrime);
     }
 
     const registrosComCrimes = dadosAgrupados.filter(d => d.soma_vitimas > 0);
     const registrosSemCrimes = dadosAgrupados.filter(d => d.soma_vitimas === 0);
-
     const valores = registrosComCrimes.map(d => d.soma_vitimas);
-
-    if (valores.length === 0) {
-        console.warn(`Nenhum crime registrado para: ${NomesCrimes[idCrime]} no nível ${nivel}`);
-    }
 
     const escalaCor = d3.scaleQuantile()
         .domain(valores.length > 0 ? valores : [0])
@@ -36,27 +28,67 @@ function colorirMapaPorCrime(idCrime, nivel = 'estadual') {
 
     if (nivel === 'estadual') {
         registrosSemCrimes.forEach(d => {
-            colorirEstado(d.uf, corZero);
+            colorirEstado(d.uf, corZero, 0);
         });
 
         registrosComCrimes.forEach(d => {
             const cor = escalaCor(d.soma_vitimas);
-            colorirEstado(d.uf, cor);
+            colorirEstado(d.uf, cor, d.vitimas_absolutas);
         });
     } else {
-        // Municipal
         registrosSemCrimes.forEach(d => {
-            colorirMunicipio(d.municipio, d.uf, corZero);
+            colorirMunicipio(d.municipio, d.uf, corZero, 0);
         });
 
         registrosComCrimes.forEach(d => {
             const cor = escalaCor(d.soma_vitimas);
-            colorirMunicipio(d.municipio, d.uf, cor);
+            colorirMunicipio(d.municipio, d.uf, cor, d.soma_vitimas);
         });
     }
 
     criarLegenda(escalaCor, corZero); 
-    criarGraficoBarras(idCrime);
+    criarGraficoBarras(idCrime, nivel);
+}
+
+function vincularTooltipMapa(selecaoD3, titulo, vitimas) {
+    let tooltipMapa = d3.select("body").select(".tooltip-mapa");
+    if (tooltipMapa.empty()) {
+        tooltipMapa = d3.select("body").append("div")
+            .attr("class", "tooltip-mapa")
+            .style("position", "absolute")
+            .style("background-color", "white")
+            .style("border", "1px solid #ccc")
+            .style("border-radius", "5px")
+            .style("padding", "8px")
+            .style("font-family", "sans-serif")
+            .style("font-size", "12px")
+            .style("pointer-events", "none")
+            .style("opacity", 0)
+            .style("box-shadow", "0px 2px 4px rgba(0,0,0,0.2)")
+            .style("z-index", "999");
+    }
+
+    if (vitimas === undefined || vitimas === null) {
+        selecaoD3.on("mouseover", null).on("mousemove", null).on("mouseleave", null);
+        return;
+    }
+
+    selecaoD3
+        .on("mouseover", function(event) {
+            tooltipMapa.html(`
+                <strong>${titulo}</strong><br>
+                Total vítimas: ${Math.round(vitimas)}
+            `).style("opacity", 1);
+            
+        })
+        .on("mousemove", function(event) {
+            tooltipMapa.style("left", (event.pageX + 15) + "px")
+                       .style("top", (event.pageY - 25) + "px");
+        })
+        .on("mouseleave", function(event) {
+            tooltipMapa.style("opacity", 0);
+            
+        });
 }
 
 function criarLegenda(escalaCor, corZero) {
@@ -133,15 +165,15 @@ function criarLegenda(escalaCor, corZero) {
         .style("font-size", "14px");
 }
 
-function criarGraficoBarras(idCrime) {
+function criarGraficoBarras(idCrime, nivel = 'estadual') {
     if (!NomesCrimes[idCrime]) {
         console.error("criarGraficoBarras - ID de crime não encontrado:", idCrime);
         return;
     }
 
-    const dadosCrime = FilterService.filtrarPorCrime(idCrime);
+    const dadosCrime = FilterService.filtrarPorCrime(idCrime, nivel);
     const dadosAgrupados = FilterService.agruparPorMes(dadosCrime);
-
+    
     dadosAgrupados.sort((a, b) => {
         if (a.ano !== b.ano) return parseInt(a.ano) - parseInt(b.ano);
         return parseInt(a.mes) - parseInt(b.mes);

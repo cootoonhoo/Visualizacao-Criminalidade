@@ -24,21 +24,22 @@ async function renderizaMapaBrasil(idContainerMapaBrasil) {
     }
 }
 
-function colorirEstado(siglaEstado, corHexadecimal) {
+function colorirEstado(siglaEstado, corHexadecimal, vitimas) {
     const sigla = siglaEstado.toUpperCase();
     const seletor = `path[id*="_${sigla}-"]`;
-    const municipios = document.querySelectorAll(seletor);
+    
+    const municipios = d3.selectAll(seletor);
 
-    if (municipios.length === 0) {
+    if (municipios.empty()) {
         console.warn(`Nenhum município encontrado para a sigla: ${sigla}`);
         return;
     }
 
-    municipios.forEach(municipio => {
-        municipio.style.fill = corHexadecimal;
-    });
-
+    municipios.style("fill", corHexadecimal);
     estadosColoridos.add(sigla);
+
+    const tituloTooltip = sigla;
+    vincularTooltipMapa(municipios, tituloTooltip, vitimas);
 }
 
 function limparEstados(siglaEstado) {
@@ -69,7 +70,7 @@ function flushEstados() {
     estadosColoridos.clear();
 }
 
-function colorirMunicipio(cidade, estado, corHexadecimal) {
+function colorirMunicipio(cidade, estado, corHexadecimal, vitimas) {
     const idSvg = obterIdRealDoSvg(cidade, estado);
     
     if (!idSvg) {
@@ -77,10 +78,14 @@ function colorirMunicipio(cidade, estado, corHexadecimal) {
         return;
     }
 
-    const elemento = document.getElementById(idSvg);
-    if (elemento) {
-        elemento.style.fill = corHexadecimal;
+    const elemento = d3.select(`[id="${idSvg}"]`);
+
+    if (!elemento.empty()) {
+        elemento.style("fill", corHexadecimal);
         municipiosColoridos.add(idSvg);
+
+        const tituloTooltip = `${cidade} - ${estado}`;
+        vincularTooltipMapa(elemento, tituloTooltip, vitimas);
     }
 }
 

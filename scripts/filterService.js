@@ -1,7 +1,8 @@
 const FilterService = {
-    filtrarPorCrime: function(crime) {
+    filtrarPorCrime: function(crime, nivel = 'municipal') {
         let crimeEnum;
-        const registros = getDadosCriminalidade();
+        
+        const registros = nivel === 'estadual' ? getDadosCriminalidadeEstado() : getDadosCriminalidade();
 
         if (typeof crime === 'number' || !isNaN(crime)) {
             crimeEnum = String(crime);
@@ -41,7 +42,6 @@ const FilterService = {
         return Object.values(grupos);
     },
 
-    // NOVO MÉTODO: Agrupamento em nível estadual
     agruparPorUf: function(registros) {
         const grupos = registros.reduce((acc, registro) => {
             const chave = registro.uf;
@@ -50,11 +50,13 @@ const FilterService = {
                 acc[chave] = {
                     uf: registro.uf,
                     crime_nome: registro.crime_nome,
-                    soma_vitimas: 0
+                    soma_vitimas: 0,
+                    vitimas_absolutas: 0
                 };
             }
 
             acc[chave].soma_vitimas += parseFloat(registro.vitimas_escala) || 0;
+            acc[chave].vitimas_absolutas += parseFloat(registro.soma_total_vitimas) || 0;
 
             return acc;
         }, {});
