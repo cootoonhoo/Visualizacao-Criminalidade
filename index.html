@@ -3,25 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Mapa de Criminalidade</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        #controles {
+            margin: 20px;
+            font-family: sans-serif;
+        }
+        #select-crime {
+            padding: 8px;
+            font-size: 16px;
+        }
+    </style>
 </head>
 <body>
+    <div id="controles">
+        <label for="select-crime">Escolha um evento: </label>
+        <select id="select-crime">
+            <option value="0">Selecione um evento</option>
+            <option value="1">Feminicídio</option>
+            <option value="2">Homicídio doloso </option>
+            <option value="3">Lesão corporal seguida de morte </option>
+            <option value="4">Morte no trânsito ou em decorrência dele (exceto homicídio doloso) </option>
+            <option value="5">Mortes no trânsito </option>
+            <option value="6">Roubo seguido de morte (latrocínio) </option>
+            <option value="7">Suicídio </option>
+            <option value="8">Tentativa de feminicídio </option>
+            <option value="9">Tentativa de homicídio </option>
+        </select>
+    </div>
+
     <div id="display"></div>
     <div id="legenda"></div>
+
+    <!-- A ORDEM DESSES SCRIPTS IMPORTA! -->
+    <script src="./scripts/domain.js"></script>
+    <script src="./scripts/filterService.js"></script>
+    <script src="./scripts/main.js"></script>
+    <script src="./scripts/visualizacao.js"></script>
+    <script src="./scripts/eventManager.js"></script>
+    <script>
+        
+    </script>
 </body>
-    <!-- A ORDER DESSES SCRIPTS IMPORTA! -->
-    <script src="./scripts/domain.js">
-        // Módulo com funções e entidades importantes
-    </script>
-    <script src="./scripts/filterService.js">
-        // Módulo com funções de filtragem
-    </script>
-    <script src="./scripts/main.js">
-        // Módulo com as funções de renderização do mapa do Brasil e de colorir estados e municípios.
-    </script> 
-    <script src="./scripts/visualizacao.js">
-        // Módulo com funções de visualização (gráficos, tabelas, etc.)
-        // Atenção, esse módulo deve ser carregado por último, pois depende dos outros módulos.
-    </script>
 </html>

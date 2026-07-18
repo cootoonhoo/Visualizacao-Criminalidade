@@ -119,9 +119,51 @@ function obterIdRealDoSvg(cidade, estado) {
     return dicionarioSvg.get(chaveBusca);
 }
 
+
+function mapaViewPadrao()
+{
+    const corPadrao = '#5ead4f';
+    flushEstados();
+    flushMunicipios();
+
+    colorirEstado('AC',corPadrao);
+    colorirEstado('AL',corPadrao);
+    colorirEstado('AP',corPadrao);
+    colorirEstado('AM',corPadrao);
+    colorirEstado('BA',corPadrao);
+    colorirEstado('CE',corPadrao);
+    colorirEstado('DF',corPadrao);
+    colorirMunicipio('Brasília','DF',corPadrao)
+    colorirEstado('ES',corPadrao);
+    colorirEstado('GO',corPadrao);
+    colorirEstado('MA',corPadrao);
+    colorirEstado('MS',corPadrao);
+    colorirEstado('MT',corPadrao);
+    colorirEstado('MG',corPadrao);
+    colorirEstado('PA',corPadrao);
+    colorirEstado('PB',corPadrao);
+    colorirEstado('PR',corPadrao);
+    colorirEstado('PE',corPadrao);
+    colorirEstado('PI',corPadrao);
+    colorirEstado('RJ',corPadrao);
+    colorirEstado('RN',corPadrao);
+    colorirEstado('RS',corPadrao);
+    colorirEstado('RO',corPadrao);
+    colorirEstado('RR',corPadrao);
+    colorirEstado('SC',corPadrao);
+    colorirEstado('SP',corPadrao);
+    colorirEstado('SE',corPadrao);
+    colorirEstado('TO',corPadrao);
+
+    
+}
+
 // Auto execuçãco
 // Apenas para carregar o mapa do brasil
 (async () => {
     await renderizaMapaBrasil('display');
     document.getElementById('map-style').innerHTML = ''; //Removendo style global do background do svg
+
+    // Cor default
+    mapaViewPadrao();
 })();

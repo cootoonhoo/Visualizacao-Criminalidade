@@ -1,14 +1,23 @@
-function primeiraVisualizacao() {
-    const dadosHomicio = FilterService.filtrarPorCrime(2);
-    const dadosAgrupados = FilterService.agruparPorUfMunicipio(dadosHomicio);
+function colorirMapaPorCrime(idCrime) {
+    if (!NomesCrimes[idCrime]) {
+        console.error("ID de crime não encontrado:", idCrime);
+        return;
+    }
+
+    const dadosCrime = FilterService.filtrarPorCrime(idCrime);
+    const dadosAgrupados = FilterService.agruparPorUfMunicipio(dadosCrime);
 
     const munComCrimes = dadosAgrupados.filter(d => d.soma_vitimas > 0);
     const munSemCrimes = dadosAgrupados.filter(d => d.soma_vitimas === 0);
 
     const valores = munComCrimes.map(d => d.soma_vitimas);
 
+    if (valores.length === 0) {
+        console.warn(`Nenhum crime registrado para: ${NomesCrimes[idCrime]}`);
+    }
+
     const escalaCor = d3.scaleQuantile()
-        .domain(valores)
+        .domain(valores.length > 0 ? valores : [0])
         .range(['#fcbba1','#fc9272','#fb6a4a','#de2d26','#a50f15']);
 
     const corZero = "#fee5d9";
@@ -22,7 +31,7 @@ function primeiraVisualizacao() {
         colorirMunicipio(d.municipio, d.uf, cor);
     });
 
-    criarLegenda(escalaCor, corZero);
+    criarLegenda(escalaCor, corZero); 
 }
 
 function criarLegenda(escalaCor, corZero) {
@@ -33,7 +42,7 @@ function criarLegenda(escalaCor, corZero) {
     const max = d3.max(valores);
     const formatNum = d3.format(".2f");
 
-    const legendData = [n 
+    const legendData = [
         { cor: corZero, label: "0 vítimas" }
     ];
 
@@ -56,19 +65,19 @@ function criarLegenda(escalaCor, corZero) {
             .attr("height", 250)
     }
 
-    let legendGroup = svg.select(".map-legend");
-    if (legendGroup.empty()) {
-        legendGroup = svg.append("g")
-            .attr("class", "map-legend")
+    let legendaGrupo = svg.select(".leganda-mapa");
+    if (legendaGrupo.empty()) {
+        legendaGrupo = svg.append("g")
+            .attr("class", "leganda-mapa")
             .attr("transform", "translate(20, 20)");
     } else {
-        legendGroup.selectAll("*").remove();
+        legendaGrupo.selectAll("*").remove();
     }
 
     const tamanhoQuadrado = 20;
     const espacamento = 5;
 
-    const legendItem = legendGroup.selectAll(".legend-item")
+    const legendItem = legendaGrupo.selectAll(".legend-item")
         .data(legendData)
         .enter().append("g")
         .attr("class", "legend-item")
@@ -90,7 +99,7 @@ function criarLegenda(escalaCor, corZero) {
         .style("font-size", "12px")
         .style("fill", "#333");
         
-    legendGroup.append("text")
+    legendaGrupo.append("text")
         .attr("x", 0)
         .attr("y", -10)
         .text("Número de Vítimas")
