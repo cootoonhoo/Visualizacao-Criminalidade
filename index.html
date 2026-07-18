@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -11,8 +11,13 @@
 
     <script src="./scripts/main.js"></script>
     <script>
-        (() => {
-            renderizaMapaBrasil();
+        (async () => {
+            await renderizaMapaBrasil('display');
+            colorirEstado('AC', '#a6df01');
+            colorirEstado('RR', '#ff5733');
+            colorirEstado('SP', '#3357ff');
+            colorirMunicipio('RIO DE JANEIRO', 'RJ', '#ff0000');
+            colorirMunicipio('UBERLÂNDIA', 'MG', '#ff0000');
         })();
     </script>
 </body>
