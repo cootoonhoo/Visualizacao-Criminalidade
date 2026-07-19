@@ -12,6 +12,27 @@ async function renderizaMapaBrasil(idContainerMapaBrasil) {
         const container = document.getElementById(idContainerMapaBrasil);
         container.innerHTML = svg;
 
+        const svgElement = d3.select(container).select('svg');
+        
+        const zoomGroup = svgElement.append('g').attr('id', 'zoom-layer');
+        
+        const svgNode = svgElement.node();
+        const zoomNode = zoomGroup.node();
+        
+        Array.from(svgNode.childNodes).forEach(child => {
+            if (child !== zoomNode) {
+                zoomNode.appendChild(child);
+            }
+        });
+
+        const zoom = d3.zoom()
+            .scaleExtent([1, 10])
+            .on('zoom', (event) => {
+                zoomGroup.attr('transform', event.transform);
+            });
+
+        svgElement.call(zoom);
+        
         const paths = container.querySelectorAll('path[id]');
         paths.forEach(path => {
             const idOriginal = path.id;
@@ -23,7 +44,6 @@ async function renderizaMapaBrasil(idContainerMapaBrasil) {
         console.error('Erro ao carregar o SVG:', error);
     }
 }
-
 function colorirEstado(siglaEstado, corHexadecimal, vitimas) {
     const sigla = siglaEstado.toUpperCase();
     const seletor = `path[id*="_${sigla}-"]`;
@@ -123,9 +143,6 @@ function obterIdRealDoSvg(cidade, estado) {
     const chaveBusca = simplificarTexto(cidade + estado);
     return dicionarioSvg.get(chaveBusca);
 }
-
-
-
 
 // Auto execuçãco
 // Apenas para carregar o mapa do brasil

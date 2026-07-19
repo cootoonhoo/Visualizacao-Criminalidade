@@ -119,7 +119,7 @@ function criarLegenda(escalaCor, corZero) {
     if (svg.empty()) {
         svg = d3.select("#legenda").append("svg")
             .attr("width", 200)
-            .attr("height", 250)
+            .attr("height", 180)
     }
 
     let legendaGrupo = svg.select(".leganda-mapa");
