@@ -1,4 +1,4 @@
-function colorirMapaPorCrime(idCrime, nivel = 'estadual') {
+function colorirMapaPorCrime(idCrime, nivel = 'estadual', atualizarGrafico = true) {
     if (!NomesCrimes[idCrime]) {
         console.error("colorirMapaPorCrime - ID de crime não encontrado:", idCrime);
         return;
@@ -7,7 +7,16 @@ function colorirMapaPorCrime(idCrime, nivel = 'estadual') {
     flushEstados();
     if (typeof flushMunicipios === 'function') flushMunicipios();
 
-    const dadosCrime = FilterService.filtrarPorCrime(idCrime, nivel);
+    let dadosCrime = FilterService.filtrarPorCrime(idCrime, nivel);
+    
+    if (window.mesesSelecionadosBrush && window.mesesSelecionadosBrush.length > 0) {
+        dadosCrime = dadosCrime.filter(d => {
+            return window.mesesSelecionadosBrush.some(selecionado => 
+                String(selecionado.mes) === String(d.mes) && String(selecionado.ano) === String(d.ano)
+            );
+        });
+    }
+
     let dadosAgrupados = [];
 
     if (nivel === 'estadual') {
@@ -27,27 +36,18 @@ function colorirMapaPorCrime(idCrime, nivel = 'estadual') {
     const corZero = "#fee5d9";
 
     if (nivel === 'estadual') {
-        registrosSemCrimes.forEach(d => {
-            colorirEstado(d.uf, corZero, 0);
-        });
-
-        registrosComCrimes.forEach(d => {
-            const cor = escalaCor(d.soma_vitimas);
-            colorirEstado(d.uf, cor, d.vitimas_absolutas);
-        });
+        registrosSemCrimes.forEach(d => colorirEstado(d.uf, corZero, 0));
+        registrosComCrimes.forEach(d => colorirEstado(d.uf, escalaCor(d.soma_vitimas), d.vitimas_absolutas));
     } else {
-        registrosSemCrimes.forEach(d => {
-            colorirMunicipio(d.municipio, d.uf, corZero, 0);
-        });
-
-        registrosComCrimes.forEach(d => {
-            const cor = escalaCor(d.soma_vitimas);
-            colorirMunicipio(d.municipio, d.uf, cor, d.soma_vitimas);
-        });
+        registrosSemCrimes.forEach(d => colorirMunicipio(d.municipio, d.uf, corZero, 0));
+        registrosComCrimes.forEach(d => colorirMunicipio(d.municipio, d.uf, escalaCor(d.soma_vitimas), d.soma_vitimas));
     }
 
     criarLegenda(escalaCor, corZero); 
-    criarGraficoBarras(idCrime, nivel);
+    
+    if (atualizarGrafico) {
+        criarGraficoBarras(idCrime, nivel);
+    }
 }
 
 function vincularTooltipMapa(selecaoD3, titulo, vitimas) {
@@ -64,8 +64,7 @@ function vincularTooltipMapa(selecaoD3, titulo, vitimas) {
             .style("font-size", "12px")
             .style("pointer-events", "none")
             .style("opacity", 0)
-            .style("box-shadow", "0px 2px 4px rgba(0,0,0,0.2)")
-            .style("z-index", "999");
+            .style("box-shadow", "0px 2px 4px rgba(0,0,0,0.2)");
     }
 
     if (vitimas === undefined || vitimas === null) {
@@ -280,6 +279,45 @@ function criarGraficoBarras(idCrime, nivel = 'estadual') {
             tooltip.style("opacity", 0);
             d3.select(this).attr("fill", "#de2d26");
         });
+
+      const brush = d3.brushX()
+        .extent([[0, 0], [largura, altura]])
+        .on("brush end", function(event) {
+            const selection = event.selection;
+            
+            if (!selection) {
+                svg.selectAll(".barra").attr("opacity", 1);
+                if (event.type === "end") window.onBrushEnd(null);
+                return;
+            }
+
+            const [x0, x1] = selection;
+            const mesesSelecionados = [];
+
+            svg.selectAll(".barra").each(function(d) {
+                const posicaoX = x(formataData(d));
+                const centroBarra = posicaoX + (x.bandwidth() / 2);
+                const estaDentroDaSelecao = centroBarra >= x0 && centroBarra <= x1;
+
+                d3.select(this).attr("opacity", estaDentroDaSelecao ? 1 : 0.2);
+
+                if (estaDentroDaSelecao) {
+                    mesesSelecionados.push({ mes: d.mes, ano: d.ano });
+                }
+            });
+
+            if (event.type === "end") {
+                window.onBrushEnd(mesesSelecionados);
+            }
+        });
+
+    const brushGroup = svg.append("g")
+        .attr("class", "brush")
+        .call(brush);
+        
+    window.limparBrushProgramaticamente = function() {
+        brushGroup.call(brush.move, null);
+    };
 }
 
 function mapaViewPadrao() {
