@@ -46,7 +46,7 @@ async function renderizaMapaBrasil(idContainerMapaBrasil) {
 }
 function colorirEstado(siglaEstado, corHexadecimal, vitimas) {
     const sigla = siglaEstado.toUpperCase();
-    const seletor = `path[id*="_${sigla}-"]`;
+    const seletor = `path[id*="_${sigla}-"], path[id$="_${sigla}"]`;
     
     const municipios = d3.selectAll(seletor);
 
@@ -64,7 +64,7 @@ function colorirEstado(siglaEstado, corHexadecimal, vitimas) {
 
 function limparEstados(siglaEstado) {
     const sigla = siglaEstado.toUpperCase();
-    const seletor = `path[id*="_${sigla}-"]`;
+    const seletor = `path[id*="_${sigla}-"], path[id$="_${sigla}"]`;
     const municipios = document.querySelectorAll(seletor);
 
     if (municipios.length === 0) {
@@ -81,7 +81,7 @@ function limparEstados(siglaEstado) {
 
 function flushEstados() {
     estadosColoridos.forEach(sigla => {
-        const seletor = `path[id*="_${sigla}-"]`;
+        const seletor = `path[id*="_${sigla}-"], path[id$="_${sigla}"]`;
         const municipios = document.querySelectorAll(seletor);
         municipios.forEach(municipio => {
             municipio.style.fill = 'none';
