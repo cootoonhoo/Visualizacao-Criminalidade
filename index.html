@@ -35,6 +35,34 @@
         html {
             background-color: #e4e4e4;
         }
+
+        #grafico-container {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            gap: 20px;
+            margin: 20px;
+        }
+
+        #mapa-brasil {
+            flex: 1 1 480px;
+        }
+
+        #grafico-ranking {
+            flex: 1 1 480px;
+            box-sizing: border-box;
+        }
+
+        #grafico-ranking:not(:empty) {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 6px;
+            padding: 10px;
+        }
+
+        #grafico-barras {
+            flex: 1 1 100%;
+            max-width: 850px;
+        }
     </style>
 </head>
 <body>
@@ -63,13 +91,14 @@
             </select>
         </div>
     </div>
-    
+
     <div id="grafico-container">
         <div id="mapa-brasil">
             <div id="display"></div>
             <div id="legenda"></div>
         </div>
-        <div id="grafico-barras" style="margin: 20px; max-width: 850px;"></div>
+        <div id="grafico-ranking"></div>
+        <div id="grafico-barras"></div>
     </div>
     
     <!-- A ORDEM DESSES SCRIPTS IMPORTA! -->
