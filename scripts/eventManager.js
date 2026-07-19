@@ -5,7 +5,7 @@ const selectNivel = document.getElementById('select-nivel');
 
 function aplicarFiltros() {
     flushEstados();
-    if (typeof flushMunicipios === 'function') flushMunicipios();
+    flushMunicipios();
     
     const filtros = getFilters();
     
@@ -16,12 +16,8 @@ function aplicarFiltros() {
     }
 
     window.mesesSelecionadosBrush = null;
-    
     colorirMapaPorCrime(filtros.idCrime, filtros.nivel, true);
 }
-
-selectCrime.addEventListener('change', aplicarFiltros);
-selectNivel.addEventListener('change', aplicarFiltros);
 
 function getFilters() {
     return {
@@ -33,7 +29,6 @@ function getFilters() {
 window.onBrushEnd = function(meses) {
     window.mesesSelecionadosBrush = meses;
     const filtros = getFilters();
-    
     colorirMapaPorCrime(filtros.idCrime, filtros.nivel, false);
 };
 
@@ -44,9 +39,12 @@ document.addEventListener('click', function(event) {
         const clicouNosControles = event.target.closest('#controles');
         
         if (!clicouNoGrafico && !clicouNosControles) {
-            if (typeof window.limparBrushProgramaticamente === 'function') {
-                window.limparBrushProgramaticamente();
+            if (typeof window.limparBrush === 'function') {
+                window.limparBrush();
             }
         }
     }
 });
+
+selectCrime.addEventListener('change', aplicarFiltros);
+selectNivel.addEventListener('change', aplicarFiltros);

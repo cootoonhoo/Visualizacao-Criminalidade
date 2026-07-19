@@ -5,14 +5,14 @@ function colorirMapaPorCrime(idCrime, nivel = 'estadual', atualizarGrafico = tru
     }
 
     flushEstados();
-    if (typeof flushMunicipios === 'function') flushMunicipios();
+    flushMunicipios();
 
     let dadosCrime = FilterService.filtrarPorCrime(idCrime, nivel);
     
     if (window.mesesSelecionadosBrush && window.mesesSelecionadosBrush.length > 0) {
         dadosCrime = dadosCrime.filter(d => {
             return window.mesesSelecionadosBrush.some(selecionado => 
-                String(selecionado.mes) === String(d.mes) && String(selecionado.ano) === String(d.ano)
+                selecionado.mes === d.mes && selecionado.ano === d.ano
             );
         });
     }
@@ -72,8 +72,7 @@ function vincularTooltipMapa(selecaoD3, titulo, vitimas) {
         return;
     }
 
-    selecaoD3
-        .on("mouseover", function(event) {
+    selecaoD3.on("mouseover", function(event) {
             tooltipMapa.html(`
                 <strong>${titulo}</strong><br>
                 Total vítimas: ${Math.round(vitimas)}
@@ -81,12 +80,10 @@ function vincularTooltipMapa(selecaoD3, titulo, vitimas) {
             
         })
         .on("mousemove", function(event) {
-            tooltipMapa.style("left", (event.pageX + 15) + "px")
-                       .style("top", (event.pageY - 25) + "px");
+            tooltipMapa.style("left", (event.pageX + 15) + "px").style("top", (event.pageY - 25) + "px");
         })
         .on("mouseleave", function(event) {
             tooltipMapa.style("opacity", 0);
-            
         });
 }
 
@@ -96,7 +93,7 @@ function criarLegenda(escalaCor, corZero) {
     const valores = escalaCor.domain();
     const min = d3.min(valores);
     const max = d3.max(valores);
-    const formatNum = d3.format(".2f");
+    const formatarCasasDecimais = d3.format(".2f");
 
     const legendData = [
         { cor: corZero, label: "0 vítimas" }
@@ -105,16 +102,16 @@ function criarLegenda(escalaCor, corZero) {
     cores.forEach((cor, i) => {
         let label = "";
         if (i === 0) {
-            label = `1 - ${formatNum(cortes[i])}`;
+            label = `1 - ${formatarCasasDecimais(cortes[i])}`;
         } else if (i === cores.length - 1) {
-            label = `Mais de ${formatNum(cortes[i - 1])}`;
+            label = `Mais de ${formatarCasasDecimais(cortes[i - 1])}`;
         } else {
-            label = `${formatNum(cortes[i - 1])} - ${formatNum(cortes[i])}`;
+            label = `${formatarCasasDecimais(cortes[i - 1])} - ${formatarCasasDecimais(cortes[i])}`;
         }
         legendData.push({ cor, label });
     });
+
     let svg = d3.select("#legenda").select("svg");
-    
     if (svg.empty()) {
         svg = d3.select("#legenda").append("svg")
             .attr("width", 200)
@@ -126,7 +123,8 @@ function criarLegenda(escalaCor, corZero) {
         legendaGrupo = svg.append("g")
             .attr("class", "leganda-mapa")
             .attr("transform", "translate(20, 20)");
-    } else {
+    } 
+    else {
         legendaGrupo.selectAll("*").remove();
     }
 
@@ -315,7 +313,7 @@ function criarGraficoBarras(idCrime, nivel = 'estadual') {
         .attr("class", "brush")
         .call(brush);
         
-    window.limparBrushProgramaticamente = function() {
+    window.limparBrush = function() {
         brushGroup.call(brush.move, null);
     };
 }
