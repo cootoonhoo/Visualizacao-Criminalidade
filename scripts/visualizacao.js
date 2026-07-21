@@ -115,7 +115,7 @@ function criarLegenda(escalaCor, corZero) {
     if (svg.empty()) {
         svg = d3.select("#legenda").append("svg")
             .attr("width", 200)
-            .attr("height", 180)
+            .attr("height", 190)
     }
 
     let legendaGrupo = svg.select(".leganda-mapa");
@@ -156,10 +156,17 @@ function criarLegenda(escalaCor, corZero) {
     legendaGrupo.append("text")
         .attr("x", 0)
         .attr("y", -10)
-        .text("Número de Vítimas")
+        .text("Número de Vítimas*")
         .style("font-family", "sans-serif")
         .style("font-weight", "bold")
         .style("font-size", "14px");
+
+        legendaGrupo.append("text")
+        .attr("x", -20)
+        .attr("y", 165)
+        .text("* na escala de evento p/ 100 mil hab.")
+        .style("font-family", "sans-serif")
+        .style("font-size", "12px");
 }
 
 function criarGraficoBarras(idCrime, nivel = 'estadual') {
@@ -211,7 +218,7 @@ function criarGraficoBarras(idCrime, nivel = 'estadual') {
         .style("font-weight", "bold")
         .style("font-family", "sans-serif")
         .style("fill", "#333") 
-        .text("Somatório de vítimas ao longo do ano");
+        .text("Quantidade de vítimas por mês");
 
     svg.append("g")
         .attr("transform", `translate(0,${altura})`)
