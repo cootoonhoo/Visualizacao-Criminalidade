@@ -44,10 +44,10 @@ function colorirMapaPorCrime(idCrime, nivel = 'estadual', atualizarGrafico = tru
     }
 
     criarLegenda(escalaCor, corZero); 
+    criarRankingBarras(registrosComCrimes, nivel, escalaCor);
     
-    if (atualizarGrafico) {
+    if (atualizarGrafico)
         criarGraficoBarras(idCrime, nivel);
-    }
 }
 
 function vincularTooltipMapa(selecaoD3, titulo, vitimas) {
@@ -186,7 +186,7 @@ function criarGraficoBarras(idCrime, nivel = 'estadual') {
     const formataData = d => `${String(d.mes).padStart(2, '0')}/${d.ano}`;
 
     const margem = { top: 40, right: 10, bottom: 40, left: 40 };
-    const largura = 710 - margem.left - margem.right;
+    const largura = 500 - margem.left - margem.right;
     const altura = 120 - margem.top - margem.bottom; 
 
     const container = d3.select("#grafico-barras");
@@ -336,6 +336,110 @@ function criarGraficoBarras(idCrime, nivel = 'estadual') {
     };
 }
 
+function criarRankingBarras(registrosComCrimes, nivel = 'estadual', escalaCor) {
+    const containerId = '#grafico-ranking';
+    const containerElement = document.querySelector(containerId);
+    const rankingContainer = document.querySelector('#ranking-container');
+    
+    if (!containerElement) return;
+
+    d3.select(containerId).selectAll("*").remove();
+
+    const dadosMapeados = registrosComCrimes.map(d => {
+        return {
+            local: nivel === 'estadual' ? d.uf : `${d.municipio} - ${d.uf}`,
+            vitimas: nivel === 'estadual' ? d.vitimas_absolutas : d.soma_vitimas,
+            valorCor: d.soma_vitimas 
+        };
+    });
+
+    const top10 = [...dadosMapeados]
+        .sort((a, b) => b.vitimas - a.vitimas)
+        .slice(0, 10);
+
+    if (top10.length === 0) {
+        if (rankingContainer) rankingContainer.style.display = 'none';
+        return;
+    }
+
+    if (rankingContainer) rankingContainer.style.display = 'flex';
+
+    const margin = { top: 40, right: 35, bottom: 30, left: 210 };
+    const width = 750 - margin.left - margin.right;
+    const height = 300 - margin.top - margin.bottom;
+
+    const svg = d3.select(containerId)
+        .append("svg")
+        .attr("width", "100%")
+        .attr("height", "100%")
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", -20)
+        .attr("text-anchor", "middle")
+        .style("font-size", "14px")
+        .style("font-weight", "bold")
+        .style("fill", "#333")
+        .text("Top 10 ocorrências");
+
+    const x = d3.scaleLinear()
+        .domain([0, d3.max(top10, d => d.vitimas)])
+        .range([0, width]);
+
+    const y = d3.scaleBand()
+        .domain(top10.map(d => d.local))
+        .range([0, height])
+        .padding(0.2);
+
+    svg.append("g")
+        .attr("class", "grid")
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(x).ticks(5).tickSize(-height).tickFormat(""))
+        .selectAll("line")
+        .style("stroke", "#e0e0e0")
+        .style("stroke-dasharray", "3,3");
+
+    svg.append("g")
+        .call(d3.axisLeft(y))
+        .selectAll("text")
+        .style("font-size", "11px")
+        .style("fill", "#333");
+
+    svg.append("g")
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(x).ticks(5).tickFormat(d => Math.round(d)))
+        .selectAll("text")
+        .style("font-size", "10px")
+        .style("fill", "#666");
+
+    svg.selectAll(".domain").remove();
+
+    svg.selectAll(".barra")
+        .data(top10)
+        .enter()
+        .append("rect")
+        .attr("class", "barra")
+        .attr("y", d => y(d.local))
+        .attr("x", 0)
+        .attr("height", y.bandwidth())
+        .attr("width", d => x(d.vitimas))
+        .attr("fill", d => escalaCor ? escalaCor(d.valorCor) : "#de2d26");
+
+    svg.selectAll(".rotulo")
+        .data(top10)
+        .enter()
+        .append("text")
+        .attr("class", "rotulo")
+        .attr("y", d => y(d.local) + y.bandwidth() / 2)
+        .attr("x", d => x(d.vitimas) + 5)
+        .text(d => Math.round(d.vitimas))
+        .style("font-size", "10px")
+        .style("font-weight", "bold")
+        .style("fill", "#555");
+}
+
 function mapaViewPadrao() {
     const corPadrao = '#5ead4f';
     flushEstados();
@@ -371,4 +475,5 @@ function mapaViewPadrao() {
     colorirEstado('TO',corPadrao);
     document.getElementById('legenda').innerText= ''; 
     document.getElementById('grafico-barras').innerText= ''; 
+    document.getElementById('grafico-ranking').innerText = '';
 }
