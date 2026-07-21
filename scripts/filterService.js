@@ -30,11 +30,15 @@ const FilterService = {
                     uf: registro.uf,
                     municipio: registro.municipio,
                     crime_nome: registro.crime_nome,
-                    soma_vitimas: 0
+                    soma_vitimas: 0,
+                    vitimas_absolutas: 0 
                 };
             }
 
             acc[chave].soma_vitimas += parseFloat(registro.vitimas_escala) || 0;
+            
+            let valorReal = registro.soma_total_vitimas || registro.vitimas_escala || 0;
+            acc[chave].vitimas_absolutas += parseFloat(valorReal) || 0;
 
             return acc;
         }, {});
@@ -73,11 +77,14 @@ const FilterService = {
                     ano: registro.ano,
                     mes: registro.mes,
                     crime_nome: registro.crime_nome,
-                    soma_vitimas: 0
+                    soma_vitimas: 0,
+                    vitimas_absolutas: 0 
                 };
             }
 
             acc[chave].soma_vitimas += parseFloat(registro.vitimas_escala) || 0;
+            let valorReal = registro.soma_total_vitimas || registro.vitimas_escala || 0;
+            acc[chave].vitimas_absolutas += parseFloat(valorReal) || 0;
 
             return acc;
         }, {});

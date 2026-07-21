@@ -179,7 +179,7 @@ function criarGraficoBarras(idCrime, nivel = 'estadual') {
     const formataData = d => `${String(d.mes).padStart(2, '0')}/${d.ano}`;
 
     const margem = { top: 40, right: 10, bottom: 40, left: 40 };
-    const largura = 800 - margem.left - margem.right;
+    const largura = 710 - margem.left - margem.right;
     const altura = 120 - margem.top - margem.bottom; 
 
     const container = d3.select("#grafico-barras");
@@ -191,8 +191,8 @@ function criarGraficoBarras(idCrime, nivel = 'estadual') {
         .append("g")
         .attr("transform", `translate(${margem.left},${margem.top})`);
 
-    const min = d3.min(dadosAgrupados, d => d.soma_vitimas);
-    const max = d3.max(dadosAgrupados, d => d.soma_vitimas);
+    const min = d3.min(dadosAgrupados, d => d.vitimas_absolutas);
+    const max = d3.max(dadosAgrupados, d => d.vitimas_absolutas);
 
     const x = d3.scaleBand()
         .domain(dadosAgrupados.map(formataData))
@@ -245,40 +245,20 @@ function criarGraficoBarras(idCrime, nivel = 'estadual') {
             .style("box-shadow", "0px 2px 4px rgba(0,0,0,0.2)");
     }
 
+    console.log(dadosAgrupados)
+
     svg.selectAll(".barra")
         .data(dadosAgrupados)
         .enter()
         .append("rect")
         .attr("class", "barra")
         .attr("x", d => x(formataData(d)))
-        .attr("y", d => y(d.soma_vitimas))
+        .attr("y", d => y(d.vitimas_absolutas))
         .attr("width", x.bandwidth())
-        .attr("height", d => altura - y(d.soma_vitimas))
+        .attr("height", d => altura - y(d.vitimas_absolutas))
         .attr("fill", "#de2d26")
         
-        .on("mouseover", function(event, d) {
-            const nomeMes = nomesMeses[parseInt(d.mes) - 1];
-            tooltip.html(`
-                <strong>
-                    ${nomeMes}
-                </strong>
-                <br>
-                Total vítimas: ${Math.round(d.soma_vitimas)}`
-            )
-                .style("opacity", 1);
-                    
-            d3.select(this).attr("fill", "#a50f15"); 
-        })
-        .on("mousemove", function(event) {
-            tooltip.style("left", (event.pageX + 15) + "px")
-                   .style("top", (event.pageY - 25) + "px");
-        })
-        .on("mouseleave", function(event, d) {
-            tooltip.style("opacity", 0);
-            d3.select(this).attr("fill", "#de2d26");
-        });
-
-      const brush = d3.brushX()
+    const brush = d3.brushX()
         .extent([[0, 0], [largura, altura]])
         .on("brush end", function(event) {
             const selection = event.selection;
@@ -313,6 +293,37 @@ function criarGraficoBarras(idCrime, nivel = 'estadual') {
         .attr("class", "brush")
         .call(brush);
         
+    brushGroup.on("mousemove", function(event) {
+            const [mouseX] = d3.pointer(event);
+            
+            const hoveredData = dadosAgrupados.find(d => {
+                const startX = x(formataData(d));
+                const endX = startX + x.bandwidth();
+                return mouseX >= startX && mouseX <= endX;
+            });
+
+            if (hoveredData) {
+                const nomeMes = nomesMeses[parseInt(hoveredData.mes) - 1];
+                tooltip.html(`
+                    <strong>${nomeMes}</strong><br>
+                    Total vítimas: ${Math.round(hoveredData.vitimas_absolutas)}
+                `)
+                .style("opacity", 1)
+                .style("left", (event.pageX + 15) + "px")
+                .style("top", (event.pageY - 25) + "px");
+
+                svg.selectAll(".barra")
+                    .attr("fill", d => d === hoveredData ? "#a50f15" : "#de2d26");
+            } else {
+                tooltip.style("opacity", 0);
+                svg.selectAll(".barra").attr("fill", "#de2d26");
+            }
+        })
+        .on("mouseleave", function() {
+            tooltip.style("opacity", 0);
+            svg.selectAll(".barra").attr("fill", "#de2d26");
+        });
+
     window.limparBrush = function() {
         brushGroup.call(brush.move, null);
     };
