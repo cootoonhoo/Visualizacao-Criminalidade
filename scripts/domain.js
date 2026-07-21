@@ -1,36 +1,59 @@
-let _dadosCriminalidade = null;
-let _dadosCriminalidadeEstado = null;
+const ANO_PADRAO = 2025;
 
+const _cachePromises = new Map();
+const _cacheResolvidos = new Map();
 
-(async () => {
-    try {
-        _dadosCriminalidade = await d3.csv("../source/dadosCrimesAnual/dadosTratados/dados_crimes_2025.csv");
-        console.log("Dados carregados com sucesso:", _dadosCriminalidade.length, "registros.");
-        // console.log("Prévia:", JSON.stringify(_dadosCriminalidade.slice(0, 5), null, 1));
+function carregarDadosAno(ano) {
+    ano = String(ano);
 
-        _dadosCriminalidadeEstado = await d3.csv("../source/dadosCrimesAnual/dadosTratados/dados_crimes_estados_2025.csv");
-        console.log("Dados carregados com sucesso:", _dadosCriminalidadeEstado.length, "registros.");
-    } catch (erro) {
-        console.error("Erro ao carregar o arquivo CSV:", erro);
-    }
-})();
+    if (_cachePromises.has(ano))
+        return _cachePromises.get(ano);
 
-function getDadosCriminalidade() {
-    if (_dadosCriminalidade !== null)
-        return _dadosCriminalidade;
+    const promessa = (async () => {
+        try {
+            const dadosMunicipal = await d3.csv(`../source/dadosCrimesAnual/dadosTratados/dados_crimes_${ano}.csv`);
+            const dadosEstadual = await d3.csv(`../source/dadosCrimesAnual/dadosTratados/dados_crimes_estados_${ano}.csv`);
 
-    throw new Error("Os dados de criminalidade ainda não foram carregados.");
+            const dados = { municipal: dadosMunicipal, estadual: dadosEstadual };
+            _cacheResolvidos.set(ano, dados);
+
+            console.log(`Dados de ${ano} carregados com sucesso:`, dadosMunicipal.length, "registros municipais,", dadosEstadual.length, "registros estaduais.");
+
+            return dados;
+        } catch (erro) {
+            console.error(`Erro ao carregar os CSVs do ano ${ano}:`, erro);
+            _cachePromises.delete(ano); 
+            throw erro;
+        }
+    })();
+
+    _cachePromises.set(ano, promessa);
+    return promessa;
 }
 
-function getDadosCriminalidadeEstado() {
-    if (_dadosCriminalidadeEstado !== null)
-        return _dadosCriminalidadeEstado;
+function getDadosCriminalidade(ano) {
+    const dados = _cacheResolvidos.get(String(ano));
 
-    throw new Error("Os dados de criminalidade estadual ainda não foram carregados.");
+    if (dados)
+        return dados.municipal;
+
+    throw new Error(`Os dados municipais de ${ano} ainda não foram carregados.`);
 }
 
+function getDadosCriminalidadeEstado(ano) {
+    const dados = _cacheResolvidos.get(String(ano));
+
+    if (dados)
+        return dados.estadual;
+
+    throw new Error(`Os dados estaduais de ${ano} ainda não foram carregados.`);
+}
+
+window.carregarDadosAno = carregarDadosAno;
 window.getDadosCriminalidade = getDadosCriminalidade;
 window.getDadosCriminalidadeEstado = getDadosCriminalidadeEstado;
+
+carregarDadosAno(ANO_PADRAO);
 
 const MapeamentoCrimes = Object.freeze({
     'Feminicídio': 1,

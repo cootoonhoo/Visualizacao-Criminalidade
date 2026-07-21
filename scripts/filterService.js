@@ -1,8 +1,8 @@
 const FilterService = {
-    filtrarPorCrime: function(crime, nivel = 'municipal') {
+    filtrarPorCrime: function(crime, nivel = 'municipal', ano) {
         let crimeEnum;
         
-        const registros = nivel === 'estadual' ? getDadosCriminalidadeEstado() : getDadosCriminalidade();
+        const registros = nivel === 'estadual' ? getDadosCriminalidadeEstado(ano) : getDadosCriminalidade(ano);
 
         if (typeof crime === 'number' || !isNaN(crime)) {
             crimeEnum = String(crime);

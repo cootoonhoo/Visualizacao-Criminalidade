@@ -2,8 +2,9 @@ window.mesesSelecionadosBrush = null;
 
 const selectCrime = document.getElementById('select-crime');
 const selectNivel = document.getElementById('select-nivel');
+const selectAno = document.getElementById('select-ano');
 
-function aplicarFiltros() {
+async function aplicarFiltros() {
     flushEstados();
     flushMunicipios();
     
@@ -16,20 +17,24 @@ function aplicarFiltros() {
     }
 
     window.mesesSelecionadosBrush = null;
-    colorirMapaPorCrime(filtros.idCrime, filtros.nivel, true);
+    
+    await carregarDadosAno(filtros.ano);
+
+    colorirMapaPorCrime(filtros.idCrime, filtros.nivel, true, filtros.ano);
 }
 
 function getFilters() {
     return {
         idCrime: parseInt(selectCrime.value, 10) || 0,
-        nivel: selectNivel.value
+        nivel: selectNivel.value,
+        ano: selectAno.value
     };
 }
 
 window.onBrushEnd = function(meses) {
     window.mesesSelecionadosBrush = meses;
     const filtros = getFilters();
-    colorirMapaPorCrime(filtros.idCrime, filtros.nivel, false);
+    colorirMapaPorCrime(filtros.idCrime, filtros.nivel, false, filtros.ano);
 };
 
 document.addEventListener('click', function(event) {
@@ -48,3 +53,4 @@ document.addEventListener('click', function(event) {
 
 selectCrime.addEventListener('change', aplicarFiltros);
 selectNivel.addEventListener('change', aplicarFiltros);
+selectAno.addEventListener('change', aplicarFiltros);
